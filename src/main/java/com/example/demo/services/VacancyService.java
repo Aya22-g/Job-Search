@@ -1,10 +1,13 @@
 package com.example.demo.services;
 
+import com.example.demo.model.Vacancy;
 import com.example.model.Vacancy;
 import com.example.repositories.VacancyRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -47,5 +50,38 @@ public class VacancyService {
 
     public void deleteVacancy(Long id) {
         vacancyRepository.deleteById(id);
+    }
+
+    @Transactional
+    public Response applyForVacancy(Long vacancyId, Long resumeId, Long applicantId) {
+
+        Vacancy vacancy = vacancyRepository.findById(vacancyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Вакансия не найдена"));
+
+
+        if (!vacancy.getIsActive()) {
+            throw new BusinessLogicException("Нельзя откликнуться на неактивную вакансию");
+        }
+
+
+        Resume resume = resumeRepository.findById(resumeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Резюме не найдено"));
+
+        if (!resume.getApplicant().getId().equals(applicantId)) {
+            throw new BusinessLogicException("Нельзя использовать чужое резюме");
+        }
+
+
+        if (responseRepository.existsByVacancyIdAndResumeId(vacancyId, resumeId)) {
+            throw new DuplicateEntryException("Вы уже откликались на эту вакансию");
+        }
+
+
+        Response response = new Response();
+        response.setVacancy(vacancy);
+        response.setResume(resume);
+        response.setStatus(ResponseStatus.PENDING);
+
+        return responseRepository.save(response);
     }
 }

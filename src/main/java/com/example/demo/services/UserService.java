@@ -1,9 +1,12 @@
 package com.example.demo.services;
 
+import com.example.demo.model.User;
 import com.example.model.User;
 import com.example.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -56,4 +59,35 @@ public class UserService {
     public User save(User user) {
         return userRepository.save(user);
     }
+
+    @Transactional
+    public User updateUserProfile(Long userId, UserUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ConfigDataResourceNotFoundException("Пользователь не найден"));
+
+
+        if (!user.getEmail().equals(request.getEmail()) {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new DuplicateEntryException("Email уже используется");
+            }
+            user.setEmail(request.getEmail());
+        }
+
+
+        if (request.getPhoneNumber() != null) {
+            if (!user.getPhoneNumber().equals(request.getPhoneNumber()) {
+                if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+                    throw new DuplicateEntryException("Номер телефона уже используется");
+                }
+                user.setPhoneNumber(request.getPhoneNumber());
+            }
+        }
+
+        user.setName(request.getName());
+        user.setSurname(request.getSurname());
+        user.setAge(request.getAge());
+
+        return userRepository.save(user);
+    }
+
 }
