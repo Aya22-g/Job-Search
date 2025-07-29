@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.Vacancy;
 import com.example.model.Vacancy;
 import com.example.services.VacancyService;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,15 @@ public class VacancyController {
     public ResponseEntity<List<Vacancy>> getVacanciesByCategory(
             @PathVariable Long categoryId) {
         return ResponseEntity.ok(vacancyService.getVacanciesByCategory(categoryId));
+    }
+
+    @PostMapping
+    @PreAuthorize("hasAuthority('employer')")
+    public ResponseEntity<VacancyResponse> createVacancy(
+            @RequestBody @Valid VacancyRequest request,
+            Principal principal) {
+        Long userId = Long.parseLong(((UserPrincipal) ((UsernamePasswordAuthenticationToken) principal).getPrincipal()).getId());
+        return ResponseEntity.ok(vacancyService.createVacancy(request, userId));
     }
 
 
