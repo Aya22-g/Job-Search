@@ -7,9 +7,7 @@ import com.example.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -48,6 +46,17 @@ public class Auth {
        }
 
        return ResponseEntity.ok(UserService.createUser(user));
-   }}
+   }
+
+
+   @PostMapping("/register")
+   public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
+    return ResponseEntity.ok(authService.register(request));
+   }
+
+   @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+    return ResponseEntity.ok(authService.login(request));
+   }
 
 }

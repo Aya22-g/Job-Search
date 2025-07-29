@@ -1,5 +1,7 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.Resume;
+import com.example.demo.services.ResumeService;
 import com.example.model.Resume;
 import com.example.services.ResumeService;
 import lombok.RequiredArgsConstructor;
@@ -43,5 +45,17 @@ public class ResumeController {
     public ResponseEntity<List<Resume>> getResumesByCategory(
             @PathVariable Long categoryId) {
         return ResponseEntity.ok(resumeService.getResumesByCategory(categoryId));
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<ResumeResponse> getResume(@PathVariable Long id) {
+        return ResponseEntity.ok(resumeService.getResumeById(id));
+    }
+
+    public ResponseEntity<ResumeResponse> createResume(
+            @RequestBody @Valid ResumeRequest request,
+            Principal principal) {
+        Long userId = Long.parseLong(((UserPrincipal) ((UsernamePasswordAuthenticationToken) principal).getPrincipal()).getId());
+        return ResponseEntity.ok(resumeService.createResume(request, userId));
     }
 }
